@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.3,
+        "y": 4.0
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.739517485823753,
+        "y": 4.002576364380968
+      },
+      "isLocked": false,
+      "linkedName": "Hub Waypoint"
+    },
+    {
+      "anchor": {
+        "x": 1.4391055456171733,
+        "y": 4.0
+      },
+      "prevControl": {
+        "x": 0.9986051966143332,
+        "y": 4.003326707218664
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End at Tower"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

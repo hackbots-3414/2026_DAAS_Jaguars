@@ -4,12 +4,16 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.ResetMode;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,6 +26,10 @@ public class CANFuelSubsystem extends SubsystemBase {
   private final SparkMax feederRoller;
   private final SparkMax intakeLauncherRoller;
   private final SparkMax agitatorRoller;
+  private final SparkMax intakeArm;
+
+  private SparkClosedLoopController armClosedLoopController;
+  private AbsoluteEncoder encoder;
 
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
@@ -29,7 +37,12 @@ public class CANFuelSubsystem extends SubsystemBase {
     intakeLauncherRoller = new SparkMax(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     feederRoller = new SparkMax(FEEDER_MOTOR_ID, MotorType.kBrushless);
     agitatorRoller = new SparkMax(AGITATOR_MOTOR_ID, MotorType.kBrushless);
+    intakeArm = new SparkMax(INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
 
+
+    armClosedLoopController = intakeArm.getClosedLoopController();
+
+    encoder = intakeArm.getAbsoluteEncoder();
     /* Put default values for various fuel operations onto the dashboard.
     All methods in this subsystem pull their values from the dashbaord to allow
     you to tune the values easily, and then replace the values in Constants.java
@@ -41,6 +54,8 @@ public class CANFuelSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     // SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Agitator Voltage", AGITATOR_VOLTAGE);
+    SmartDashboard.setDefaultNumber("Target Down Position", -1);
+    SmartDashboard.setDefaultNumber("Target Up Position", 1);
 
     // create the configuration for the agitator roller, 
     // set inverted to false so motor spins correct direction, 
@@ -66,14 +81,30 @@ public class CANFuelSubsystem extends SubsystemBase {
     launcherConfig.inverted(false);
     launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
     intakeLauncherRoller.configure(launcherConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    SparkMaxConfig armConfig =  new SparkMaxConfig();
+    armConfig.inverted(false); //Change false to true if arm is lowering wrong way.
+    armConfig.smartCurrentLimit(ARM_CURRENT_LIMIT);
+
+    armConfig.encoder.positionConversionFactor(1);
+
+    armConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+
+    //FIXME: Tune these values!
+    .p(0.1)
+    .i(0)
+    .d(0)
+    .outputRange(-1, 1);
+
+    intakeArm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
   }
 
   // A method to set the rollers to values for intaking
   private void intake() {
-    // feederRoller.setVoltage(SmartDashboard.getNumber("Intaking feeder roller
-    // value", INTAKING_FEEDER_VOLTAGE));
-    // intakeLauncherRoller.setVoltage(SmartDashboard.getNumber("Intaking intake
-    // roller value", INTAKING_INTAKE_VOLTAGE));
+    // feederRoller.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
+    // intakeLauncherRoller.setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
+    agitatorRoller.setVoltage(-1 * SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
     feederRoller.setVoltage(INTAKING_FEEDER_VOLTAGE);
     intakeLauncherRoller.setVoltage(INTAKING_INTAKE_VOLTAGE);
   }
@@ -81,10 +112,9 @@ public class CANFuelSubsystem extends SubsystemBase {
   // A method to set the rollers to values for ejecting fuel out the intake. Uses
   // the same values as intaking, but in the opposite direction.
   private void eject() {
-    // feederRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking feeder roller
-    // value", INTAKING_FEEDER_VOLTAGE));
-    // intakeLauncherRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking
-    // intake roller value", INTAKING_INTAKE_VOLTAGE));
+    // feederRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
+    // intakeLauncherRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
+    agitatorRoller.setVoltage(SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
     feederRoller.setVoltage(-1 * INTAKING_FEEDER_VOLTAGE);
     intakeLauncherRoller.setVoltage(-1 * INTAKING_INTAKE_VOLTAGE);
   }
@@ -111,6 +141,14 @@ public class CANFuelSubsystem extends SubsystemBase {
   private void spinUp() {
     // feederRoller.setVoltage(SmartDashboard.getNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE));
     feederRoller.setVoltage(SPIN_UP_FEEDER_VOLTAGE);
+  }
+
+  private void dropIntake() {
+    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Down Postiion", 0), ControlType.kPosition);
+  }
+
+  private void raiseIntake() {
+    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 0), ControlType.kPosition);
   }
 
   // A command factory to turn the spinUp method into a command that requires this
@@ -142,5 +180,13 @@ public class CANFuelSubsystem extends SubsystemBase {
 
   public Command spinUpLaunchCommand() {
     return Commands.sequence(spinUpCommand(), launchCommand());
+  }
+
+  public Command dropIntakeCommand() {
+    return this.run(() -> dropIntake()).finallyDo(() -> stop());
+  }
+
+    public Command raiseIntakeCommand() {
+    return this.run(() -> raiseIntake()).finallyDo(() -> stop());
   }
 }

@@ -10,11 +10,18 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.auto.NamedCommands;
+
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -25,7 +32,8 @@ import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
-
+    
+    private final SendableChooser<Command> autoChooser;
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -47,8 +55,35 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    //Create a sendable chooser
+    //SendableChooser<Command> chooser = new SendableChooser<>();
+
+    //Define the autonomous commands for use in the chooser
+    private final Command doNothing = Commands.idle();
+    private final Command autoLaunch = Commands.sequence(new PathPlannerAuto("New New Auto"), ballSubsystem.spinUpLaunchCommand());
+    private final Command autoClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), new PathPlannerAuto("New New Auto")), climberSubsystem.climbDownCommand()); //FIXME: Need to create a new pathplanner auto to go to the climb position and put it in instead of new new auto.
+    private final Command autoLaunchClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), autoLaunch), new PathPlannerAuto("New New Auto"), climberSubsystem.climbDownCommand()); //FIXME In case you find yourself with lots of extra time left in auton. Need to make a pathplanner auto that connects the launch and climb locations, and swap New New Auto out.
+
+
     public RobotContainer() {
         configureBindings();
+
+        //Auto commands
+        NamedCommands.registerCommand("Spin Up and Launch",new InstantCommand(()->ballSubsystem.spinUpLaunchCommand()));
+        NamedCommands.registerCommand("Climb Up",new InstantCommand(()->climberSubsystem.climbUpCommand()));
+        NamedCommands.registerCommand("Intake In",new InstantCommand(()->ballSubsystem.raiseIntakeCommand()));
+        NamedCommands.registerCommand("Outake",new InstantCommand(()->ballSubsystem.dropIntakeCommand()));
+
+        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        SmartDashboard.putData("Auto Mode", autoChooser);
+
+        //Add options to chooser and name them
+        /*chooser.setDefaultOption("Do nothing", doNothing);
+        chooser.addOption("Launch", autoLaunch);
+        chooser.addOption("Climb", autoClimb);
+        chooser.addOption("Both", autoLaunchClimb);
+        //Publish chooser to smartdashboard
+        SmartDashboard.putData(chooser);*/
     }
 
     private void configureBindings() {
@@ -103,10 +138,15 @@ public class RobotContainer {
         // Climb down while holding B
         operatorController.b().whileTrue(climberSubsystem.climbDownCommand());
 
+        //Raise lower inake arm with POV buttons
+        operatorController.povUp().whileTrue(ballSubsystem.raiseIntakeCommand());
+        operatorController.povDown().whileTrue(ballSubsystem.dropIntakeCommand());
+
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("New New Auto");
+        //Run whatever auton is selected through smartdashboard's chooser
+        return autoChooser.getSelected();
     }
 }
