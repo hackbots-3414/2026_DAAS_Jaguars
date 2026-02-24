@@ -49,7 +49,6 @@ public class ClimberSubsystem extends SubsystemBase {
 
         climberConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
         
-
         climberConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop

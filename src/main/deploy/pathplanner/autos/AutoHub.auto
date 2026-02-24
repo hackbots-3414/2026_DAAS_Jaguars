@@ -7,19 +7,32 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Fuel Intake then Hub "
+            "pathName": "Fuel Intake"
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "Intake In"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake In"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.0
+                }
+              }
+            ]
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 1.0
+            "pathName": "Intake to Hub "
           }
         },
         {

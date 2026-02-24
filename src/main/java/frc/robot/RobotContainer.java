@@ -13,8 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.auto.NamedCommands;
-
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -33,7 +32,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
     
-    private final SendableChooser<Command> autoChooser;
+    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -60,21 +59,29 @@ public class RobotContainer {
 
     //Define the autonomous commands for use in the chooser
     private final Command doNothing = Commands.idle();
-    private final Command autoLaunch = Commands.sequence(new PathPlannerAuto("New New Auto"), ballSubsystem.spinUpLaunchCommand());
-    private final Command autoClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), new PathPlannerAuto("New New Auto")), climberSubsystem.climbDownCommand()); //FIXME: Need to create a new pathplanner auto to go to the climb position and put it in instead of new new auto.
-    private final Command autoLaunchClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), autoLaunch), new PathPlannerAuto("New New Auto"), climberSubsystem.climbDownCommand()); //FIXME In case you find yourself with lots of extra time left in auton. Need to make a pathplanner auto that connects the launch and climb locations, and swap New New Auto out.
+    // private final Command autoLaunch = Commands.sequence(new PathPlannerAuto("New New Auto"), ballSubsystem.spinUpLaunchCommand());
+    // private final Command autoClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), new PathPlannerAuto("New New Auto")), climberSubsystem.climbDownCommand()); //FIXME: Need to create a new pathplanner auto to go to the climb position and put it in instead of new new auto.
+    // private final Command autoLaunchClimb = Commands.sequence(Commands.parallel(climberSubsystem.climbUpCommand(), autoLaunch), new PathPlannerAuto("New New Auto"), climberSubsystem.climbDownCommand()); //FIXME In case you find yourself with lots of extra time left in auton. Need to make a pathplanner auto that connects the launch and climb locations, and swap New New Auto out.
 
 
     public RobotContainer() {
         configureBindings();
 
         //Auto commands
-        NamedCommands.registerCommand("Spin Up and Launch",new InstantCommand(()->ballSubsystem.spinUpLaunchCommand()));
-        NamedCommands.registerCommand("Climb Up",new InstantCommand(()->climberSubsystem.climbUpCommand()));
-        NamedCommands.registerCommand("Intake In",new InstantCommand(()->ballSubsystem.raiseIntakeCommand()));
-        NamedCommands.registerCommand("Outake",new InstantCommand(()->ballSubsystem.dropIntakeCommand()));
+        NamedCommands.registerCommand("Do Nothing", Commands.idle());
+        NamedCommands.registerCommand("Spin Up and Launch", ballSubsystem.spinUpLaunchCommand());
+        NamedCommands.registerCommand("Climb Up", climberSubsystem.climbUpCommand());
+        // NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.raiseIntakeCommand().withTimeout(3), ballSubsystem.intakeCommand()));
+        NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.intakeCommand()));
+        // NamedCommands.registerCommand("Intake Out", Commands.sequence(ballSubsystem.dropIntakeCommand().withTimeout(3), ballSubsystem.intakeCommand()));
+        NamedCommands.registerCommand("Outake",ballSubsystem.ejectCommand());
+        NamedCommands.registerCommand("Climb Down", climberSubsystem.climbDownCommand());
 
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        // autoChooser = AutoBuilder.buildAutoChooser("Do Nothing");
+        autoChooser.setDefaultOption("Do Nothing", doNothing);
+        autoChooser.addOption("Auto Hub", new PathPlannerAuto("AutoHub"));
+        autoChooser.addOption("Hub Tower", new PathPlannerAuto("Hub Tower"));
+
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         //Add options to chooser and name them

@@ -86,7 +86,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     armConfig.inverted(false); //Change false to true if arm is lowering wrong way.
     armConfig.smartCurrentLimit(ARM_CURRENT_LIMIT);
 
-    armConfig.encoder.positionConversionFactor(1);
+    armConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
 
     armConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
 
@@ -179,7 +179,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   public Command spinUpLaunchCommand() {
-    return Commands.sequence(spinUpCommand(), launchCommand());
+    return Commands.sequence(spinUpCommand(), launchCommand()).finallyDo(() -> stop());
   }
 
   public Command dropIntakeCommand() {
