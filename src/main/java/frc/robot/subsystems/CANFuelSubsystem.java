@@ -29,7 +29,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   private final SparkMax intakeArm;
 
   private SparkClosedLoopController armClosedLoopController;
-  private AbsoluteEncoder encoder;
+  private RelativeEncoder encoder;
 
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
@@ -42,7 +42,7 @@ public class CANFuelSubsystem extends SubsystemBase {
 
     armClosedLoopController = intakeArm.getClosedLoopController();
 
-    encoder = intakeArm.getAbsoluteEncoder();
+    encoder = intakeArm.getEncoder();
     /* Put default values for various fuel operations onto the dashboard.
     All methods in this subsystem pull their values from the dashbaord to allow
     you to tune the values easily, and then replace the values in Constants.java
@@ -54,8 +54,8 @@ public class CANFuelSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     // SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Agitator Voltage", AGITATOR_VOLTAGE);
-    SmartDashboard.setDefaultNumber("Target Down Position", -1);
-    SmartDashboard.setDefaultNumber("Target Up Position", 1);
+    SmartDashboard.setDefaultNumber("Target Down Position", 0);
+    SmartDashboard.setDefaultNumber("Target Up Position", 280);
 
     // create the configuration for the agitator roller, 
     // set inverted to false so motor spins correct direction, 
@@ -148,7 +148,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   private void raiseIntake() {
-    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 0), ControlType.kPosition);
+    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 280), ControlType.kPosition);
   }
 
   // A command factory to turn the spinUp method into a command that requires this
