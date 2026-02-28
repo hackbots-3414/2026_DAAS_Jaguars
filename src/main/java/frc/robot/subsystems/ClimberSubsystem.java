@@ -7,8 +7,6 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.ClimberConstants.CLIMBER_CURRENT_LIMIT;
 import static frc.robot.Constants.ClimberConstants.CLIMBER_MOTOR_ID;
 import static frc.robot.Constants.ClimberConstants.CLIMB_DOWN_VOLTAGE;
-import static frc.robot.Constants.ClimberConstants.CLIMB_UP_VOLTAGE;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;

@@ -6,15 +6,19 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.ClimberSubsystem;
 
 public class Robot extends TimedRobot {
+    private Vision vision;
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
+    private final Field2d m_field = new Field2d();
 
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
@@ -23,12 +27,22 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
+        SmartDashboard.putData("Field", m_field);
     }
+
+ @Override
+  public void robotInit() { 
+    PortForwarder.add(5800, "photonvision.local", 5800);
+    vision = new Vision(RobotContainer.drivetrain::addVisionMeasurement);
+  }
 
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run(); 
+
+        // Update vision
+        vision.periodic();
     }
 
     @Override

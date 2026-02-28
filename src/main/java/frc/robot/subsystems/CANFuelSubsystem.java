@@ -4,11 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -29,6 +28,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   private final SparkMax intakeArm;
 
   private SparkClosedLoopController armClosedLoopController;
+  private SparkMaxConfig armConfig;
   private RelativeEncoder encoder;
 
   /** Creates a new CANBallSubsystem. */
@@ -41,8 +41,9 @@ public class CANFuelSubsystem extends SubsystemBase {
 
 
     armClosedLoopController = intakeArm.getClosedLoopController();
-
     encoder = intakeArm.getEncoder();
+    encoder.setPosition(0);
+
     /* Put default values for various fuel operations onto the dashboard.
     All methods in this subsystem pull their values from the dashbaord to allow
     you to tune the values easily, and then replace the values in Constants.java
@@ -54,8 +55,8 @@ public class CANFuelSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     // SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Agitator Voltage", AGITATOR_VOLTAGE);
-    SmartDashboard.setDefaultNumber("Target Down Position", 0);
-    SmartDashboard.setDefaultNumber("Target Up Position", 280);
+    SmartDashboard.setDefaultNumber("Target Down Position", -.1);
+    SmartDashboard.setDefaultNumber("Target Up Position", -1.5);
 
     // create the configuration for the agitator roller, 
     // set inverted to false so motor spins correct direction, 
@@ -82,16 +83,17 @@ public class CANFuelSubsystem extends SubsystemBase {
     launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
     intakeLauncherRoller.configure(launcherConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    SparkMaxConfig armConfig =  new SparkMaxConfig();
-    armConfig.inverted(false); //Change false to true if arm is lowering wrong way.
+    armConfig =  new SparkMaxConfig();
     armConfig.smartCurrentLimit(ARM_CURRENT_LIMIT);
+    armConfig.idleMode(com.revrobotics.spark.config.SparkBaseConfig.IdleMode.kBrake);
+    armConfig.inverted(false); //Change false to true if arm is lowering wrong way.
 
     armConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
 
     armConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
 
     //FIXME: Tune these values!
-    .p(0.1)
+    .p(0.2)
     .i(0)
     .d(0)
     .outputRange(-1, 1);
@@ -144,11 +146,11 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   private void dropIntake() {
-    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Down Postiion", 0), ControlType.kPosition);
+    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Down Postiion", 1.4), ControlType.kPosition);
   }
 
   private void raiseIntake() {
-    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 280), ControlType.kPosition);
+    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 0.1), ControlType.kPosition);
   }
 
   // A command factory to turn the spinUp method into a command that requires this
