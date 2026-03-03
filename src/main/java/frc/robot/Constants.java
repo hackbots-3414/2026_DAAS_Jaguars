@@ -80,6 +80,8 @@ public final class Constants {
     public static final double AGITATOR_VOLTAGE = 7.0;
     public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
     public static final double SPIN_UP_SECONDS = 1;
+    public static final double TARGET_DOWN_POSITION = 2.8;
+    public static final double TARGET_UP_POSITION = 0.1;
   }
 public static final class ClimberConstants {
     // Motor controller ID for the climber motor

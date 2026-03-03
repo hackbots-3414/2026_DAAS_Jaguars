@@ -13,7 +13,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.ResetMode;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -54,15 +54,15 @@ public class CANFuelSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
     // SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     // SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
-    SmartDashboard.putNumber("Agitator Voltage", AGITATOR_VOLTAGE);
-    SmartDashboard.setDefaultNumber("Target Down Position", -.1);
-    SmartDashboard.setDefaultNumber("Target Up Position", -1.5);
+    // SmartDashboard.putNumber("Agitator Voltage", AGITATOR_VOLTAGE);
+    // SmartDashboard.putNumber("Target Down Position", TARGET_DOWN_POSITION);
+    // SmartDashboard.putNumber("Target Up Position", TARGET_UP_POSITION);
 
     // create the configuration for the agitator roller, 
     // set inverted to false so motor spins correct direction, 
     // and set current limit and apply config to the controller
     SparkMaxConfig agitatorConfig = new SparkMaxConfig();
-    agitatorConfig.inverted(false);  //If agitator is running the wrong direction, change false to true.
+    agitatorConfig.inverted(true);  //If agitator is running the wrong direction, change false to true.
     agitatorConfig.smartCurrentLimit(AGITATOR_CURRENT_LIMIT);
     agitatorRoller.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -93,7 +93,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     armConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
 
     //FIXME: Tune these values!
-    .p(0.2)
+    .p(0.05)
     .i(0)
     .d(0)
     .outputRange(-1, 1);
@@ -106,7 +106,9 @@ public class CANFuelSubsystem extends SubsystemBase {
   private void intake() {
     // feederRoller.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
     // intakeLauncherRoller.setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
-    agitatorRoller.setVoltage(-1 * SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
+    // agitatorRoller.setVoltage(-1 * SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
+    dropIntake();
+    agitatorRoller.setVoltage(-1 * AGITATOR_VOLTAGE);
     feederRoller.setVoltage(INTAKING_FEEDER_VOLTAGE);
     intakeLauncherRoller.setVoltage(INTAKING_INTAKE_VOLTAGE);
   }
@@ -116,7 +118,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   private void eject() {
     // feederRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
     // intakeLauncherRoller.setVoltage(-1 * SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
-    agitatorRoller.setVoltage(SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
+    agitatorRoller.setVoltage(AGITATOR_VOLTAGE);
     feederRoller.setVoltage(-1 * INTAKING_FEEDER_VOLTAGE);
     intakeLauncherRoller.setVoltage(-1 * INTAKING_INTAKE_VOLTAGE);
   }
@@ -125,10 +127,10 @@ public class CANFuelSubsystem extends SubsystemBase {
   private void launch() {
     // feederRoller.setVoltage(SmartDashboard.getNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE));
     // intakeLauncherRoller.setVoltage(SmartDashboard.getNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE));
-    agitatorRoller.setVoltage(SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
+    // agitatorRoller.setVoltage(SmartDashboard.getNumber("Agitator Voltage", AGITATOR_VOLTAGE));
     feederRoller.setVoltage(LAUNCHING_FEEDER_VOLTAGE);
     intakeLauncherRoller.setVoltage(LAUNCHING_LAUNCHER_VOLTAGE);
-    // agitatorRoller.setVoltage(AGITATOR_VOLTAGE);
+    agitatorRoller.setVoltage(AGITATOR_VOLTAGE);
   }
 
   // A method to stop the rollers
@@ -146,11 +148,14 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   private void dropIntake() {
-    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Down Postiion", 1.4), ControlType.kPosition);
+    // armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Down Postiion", TARGET_DOWN_POSITION), ControlType.kPosition);
+    armClosedLoopController.setSetpoint(TARGET_DOWN_POSITION, ControlType.kPosition);
   }
 
   private void raiseIntake() {
-    armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", 0.1), ControlType.kPosition);
+    // armClosedLoopController.setSetpoint(SmartDashboard.getNumber("Target Arm Up Postiion", TARGET_UP_POSITION), ControlType.kPosition);
+    armClosedLoopController.setSetpoint(TARGET_UP_POSITION, ControlType.kPosition);
+
   }
 
   // A command factory to turn the spinUp method into a command that requires this

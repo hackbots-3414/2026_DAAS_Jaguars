@@ -1,0 +1,89 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3309036144578312,
+        "y": 2.210072289156626
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.5385301204819273,
+        "y": 2.559759036144578
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.019349397590361,
+        "y": 3.2919156626506028
+      },
+      "prevControl": {
+        "x": 1.8547232456232317,
+        "y": 3.1037714889738828
+      },
+      "nextControl": {
+        "x": 2.1839755495574904,
+        "y": 3.4800598363273223
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.3,
+        "y": 4.0
+      },
+      "prevControl": {
+        "x": 2.8280000000000003,
+        "y": 3.7399518072289153
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Hub Waypoint"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "",
+      "waypointRelativePos": 0.7000000000000008,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "",
+      "waypointRelativePos": 1.8333333333333308,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "",
+      "waypointRelativePos": 2.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

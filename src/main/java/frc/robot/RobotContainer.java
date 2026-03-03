@@ -66,16 +66,17 @@ public class RobotContainer {
         NamedCommands.registerCommand("Do Nothing", Commands.idle());
         NamedCommands.registerCommand("Spin Up and Launch", ballSubsystem.spinUpLaunchCommand());
         NamedCommands.registerCommand("Climb Up", climberSubsystem.climbUpCommand());
-        // NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.raiseIntakeCommand().withTimeout(3), ballSubsystem.intakeCommand()));
-        NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.intakeCommand()));
-        // NamedCommands.registerCommand("Intake Out", Commands.sequence(ballSubsystem.dropIntakeCommand().withTimeout(3), ballSubsystem.intakeCommand()));
-        NamedCommands.registerCommand("Outake",ballSubsystem.ejectCommand());
+        NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.raiseIntakeCommand().withTimeout(2), ballSubsystem.intakeCommand()));
+        // NamedCommands.registerCommand("Intake In", Commands.sequence(ballSubsystem.intakeCommand()));
+        NamedCommands.registerCommand("Outake", Commands.sequence(ballSubsystem.dropIntakeCommand().withTimeout(2), ballSubsystem.intakeCommand()));
+        // NamedCommands.registerCommand("Outake",ballSubsystem.ejectCommand());
         NamedCommands.registerCommand("Climb Down", climberSubsystem.climbDownCommand());
 
         // autoChooser = AutoBuilder.buildAutoChooser("Do Nothing");
         autoChooser.setDefaultOption("Do Nothing", doNothing);
         autoChooser.addOption("Auto Hub", new PathPlannerAuto("AutoHub"));
-        autoChooser.addOption("Hub Tower", new PathPlannerAuto("Hub Tower"));
+        autoChooser.addOption("Hub Tower Left", new PathPlannerAuto("Hub Tower"));
+        autoChooser.addOption("Hub Tower Right", new PathPlannerAuto("Hub Tower Mirror"));
 
         SmartDashboard.putData("Auto Mode", autoChooser);
 
